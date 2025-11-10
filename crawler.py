@@ -47,7 +47,7 @@ async def get_book_links(session, page_html):
     """Extracts all book URLs from a page."""
     soup = BeautifulSoup(page_html, "html.parser")
     books = soup.select("article.product_pod h3 a")
-    return [BASE_URL + b["href"] for b in books]
+    return [BASE_URL + "/catalogue/" + b["href"] for b in books]
 
 
 async def process_book(session, db, book_url):
@@ -64,8 +64,7 @@ async def process_book(session, db, book_url):
 
 async def crawl_page(session, db, page_number):
     """Crawl a single page of book listings."""
-    # paginated_url = BASE_URL+f"catalogue/page-{page_number}.html"
-    url = BASE_URL.format(page_number)
+    url = BASE_URL+f"catalogue/page-{page_number}.html"
     logging.info(f"Crawling {url}")
     try:
         page_html = await fetch(session, url)
@@ -100,7 +99,6 @@ async def main():
             if not success:
                 break
             page += 1
-            break
         logging.info("Crawling finished!")
 
 if __name__ == "__main__":
