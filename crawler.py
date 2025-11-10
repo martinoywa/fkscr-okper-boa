@@ -1,5 +1,7 @@
 import asyncio
+import json
 import logging
+import os
 
 import aiohttp
 from aiohttp import ClientSession
@@ -7,26 +9,34 @@ from aiohttp import ClientSession
 import requests
 from bs4 import BeautifulSoup
 
-from db import save_book, DB
+from db import save_book, DB, save_progress, get_last_page
 from get_book_metadata import parse_book_html
 
 # TODO use dotenv
 BASE_URL = "https://books.toscrape.com/"
 MAX_RETRIES = 3
+CHECKPOINT_FILE = "checkpoint.json"
 
-# page = requests.get(BASE_URL)
-# print(page.text)
-
-# soup = BeautifulSoup(page.content, "html.parser")
-# books = soup.find_all("article", class_="product_pod")
-
-# for book in books:
-#     book_url = BASE_URL+book.find("a")["href"]
-#     data = get_book_metadata(book_url)
-#     print(data)
-#     break
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+
+
+def load_checkpoint():
+    """Read last crawled page number from checkpoint.json"""
+    if os.path.exists(CHECKPOINT_FILE):
+        try:
+            with open(CHECKPOINT_FILE, "r") as f:
+                data = json.load(f)
+                return data.get("last_page", 1)
+        except Exception:
+            return 1
+    return 1
+
+
+def save_checkpoint(page_number):
+    """Save last successfully crawled page number."""
+    with open(CHECKPOINT_FILE, "w") as f:
+        json.dump({"last_page": page_number}, f)
 
 
 async def fetch(session: ClientSession, url: str, retries=MAX_RETRIES) -> str:
@@ -55,7 +65,6 @@ async def process_book(session, db, book_url):
     try:
         html = await fetch(session, book_url)
         book = parse_book_html(html, book_url)
-        # logging.info(f"Found book {book.name}")
         await save_book(db, book)
         logging.info(f"Saved: {book.name}")
     except Exception as e:
@@ -83,6 +92,11 @@ async def crawl_page(session, db, page_number):
     for link in book_links:
         tasks.append(process_book(session, db, link))
     await asyncio.gather(*tasks)
+
+    # Save checkpoint after successfully completing this page
+    await save_progress(db, page_number)
+    logging.info(f"Finished page {page_number}, checkpoint saved.")
+
     return True
 
 """
@@ -93,7 +107,8 @@ Then search by diff title and add new books to DB.
 
 async def main():
     async with aiohttp.ClientSession() as session:
-        page = 1
+        # Read last successful page number
+        page = await get_last_page(DB)
         while True:
             success = await crawl_page(session, DB, page)
             if not success:
