@@ -161,3 +161,8 @@ $ fastapi run api/api.py --reload
   }
 ]
 ```
+
+
+---
+**GGs!** 🏁  
+_If you made it this far, you deserve a coffee ☕._
