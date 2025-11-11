@@ -1,16 +1,14 @@
 import asyncio
-import json
 import logging
-import os
+from datetime import datetime
 
-import aiohttp
+import pandas as pd
 from aiohttp import ClientSession
-
-import requests
 from bs4 import BeautifulSoup
 
-from db import save_book, DB, save_progress, get_last_page
+from db import save_book, save_progress, fetch_changes_for_day
 from get_book_metadata import parse_book_html
+from utils import flatten_changes
 
 # TODO use dotenv
 BASE_URL = "https://books.toscrape.com/"
@@ -66,6 +64,12 @@ async def crawl_page(session, db, page_number):
     try:
         page_html = await fetch(session, url)
     except Exception as e:
+        # Detect "end of pagination"
+        if "404" in str(e) or "Not Found" in str(e):
+            await save_progress(db, 1)
+            logging.info(f"No next page found at {url}. Resetting progress to 1.")
+            return False  # Stop crawling gracefully
+
         logging.error(f"Failed to crawl {url}: {e}")
         return False
 
@@ -86,3 +90,37 @@ async def crawl_page(session, db, page_number):
     logging.info(f"Finished page {page_number}, checkpoint saved.")
 
     return True
+
+
+async def generate_daily_report(format="csv"):
+    """
+    Generate a daily change report based on the current date.
+    Saves to CSV or JSON using pandas.
+    """
+    # Automatically use current day's date
+    today = datetime.utcnow()
+    date_str = today.strftime("%Y-%m-%d")
+
+    logging.info(f"Generating daily change report for {date_str}...")
+
+    # Fetch and flatten change records
+    records = await fetch_changes_for_day(today)
+    if not records:
+        logging.info(f"No changes found for {date_str}. Nothing to report.")
+        return
+
+    flat_records = flatten_changes(records)
+    df = pd.DataFrame(flat_records)
+
+    # File name
+    filename = f"change_report_{date_str}.{format}"
+
+    # Save report
+    if format == "csv":
+        df.to_csv(filename, index=False, encoding="utf-8")
+    elif format == "json":
+        df.to_json(filename, orient="records", indent=2, date_format="iso")
+    else:
+        raise ValueError("Format must be 'csv' or 'json'")
+
+    logging.info(f"Change report saved to: {filename}")

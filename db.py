@@ -87,8 +87,6 @@ async def get_last_page(db):
 
 async def save_progress(db, page_number):
     """Save the last successfully crawled page number to MongoDB."""
-    # TODO how to automatically check if the last page has been reached.
-    # TODO The Request of page fails so it kinda behaves like a missing book link?
     await db[PROGRESS_COLLECTION].update_one(
         {"_id": CRAWLER_NAME},
         {
