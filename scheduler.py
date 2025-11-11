@@ -7,7 +7,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from crawler import crawl_page
 from db import DB, get_last_page
-from reports import generate_daily_report
+from utils import generate_daily_report
 
 # Run every day at 11:40 server time
 CRAWL_HOUR = 12
