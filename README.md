@@ -91,4 +91,24 @@ $ fastapi run api/api.py --reload
 | **GET** | `/changes` | Retrieve recent changes from `CHANGELOG_COLLECTION`. | - `limit`: max number of entries<br>- `since_hours`: how far back to look (e.g., last 24 hours) | **ChangeListResponse**<br>`{ items: List[ChangeEntry] }` | 200 OK<br>401 Unauthorized<br>429 Rate limit exceeded |
 
 
-3. 
+### Miscellaneous
+1. Successfule Crawls + Scheduled Runs.
+```
+2025-11-11 14:02:27,683 [INFO] apscheduler.scheduler: Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-11-11 14:02:27,684 [INFO] apscheduler.scheduler: Added job "run_crawl" to job store "default"
+2025-11-11 14:02:27,684 [INFO] apscheduler.scheduler: Scheduler started
+2025-11-11 14:02:27,684 [INFO] book_scraper: Scheduler started. Waiting for jobs...
+2025-11-11 14:03:00,001 [INFO] apscheduler.executors.default: Running job "run_crawl (trigger: cron[hour='14', minute='3'], next run at: 2025-11-12 14:03:00 EAT)" (scheduled at 2025-11-11 14:03:00+03:00)
+2025-11-11 14:03:00,002 [INFO] book_scraper: Starting scheduled crawl...
+2025-11-11 14:03:00,027 [INFO] book_scraper: Resuming from page 1...
+2025-11-11 14:03:00,027 [INFO] book_scraper: Crawling https://books.toscrape.com/catalogue/page-1.html
+2025-11-11 14:03:01,585 [INFO] book_scraper: No changes for book: A Light in the Attic
+...
+2025-11-11 14:03:50,615 [INFO] book_scraper: No next page found at https://books.toscrape.com/catalogue/page-51.html. Resetting progress to 1.
+2025-11-11 14:03:50,618 [INFO] book_scraper: Scheduled crawl finished.
+2025-11-11 14:03:50,618 [INFO] book_scraper: Generating daily change report for 2025-11-11...
+2025-11-11 14:03:50,645 [INFO] book_scraper: Change report saved to: change_report_2025-11-11.csv
+2025-11-11 14:03:50,645 [INFO] book_scraper: Daily change report generated successfully.
+2025-11-11 14:03:50,645 [INFO] apscheduler.executors.default: Job "run_crawl (trigger: cron[hour='14', minute='3'], next run at: 2025-11-12 14:03:00 EAT)" executed successfully
+```
+2. 
