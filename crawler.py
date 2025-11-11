@@ -86,18 +86,3 @@ async def crawl_page(session, db, page_number):
     logging.info(f"Finished page {page_number}, checkpoint saved.")
 
     return True
-
-
-async def main():
-    async with aiohttp.ClientSession() as session:
-        # Read last successful page number
-        page = await get_last_page(DB)
-        while True:
-            success = await crawl_page(session, DB, page)
-            if not success:
-                break
-            page += 1
-        logging.info("Crawling finished!")
-
-if __name__ == "__main__":
-    asyncio.run(main())
