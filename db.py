@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import motor.motor_asyncio
 
@@ -122,3 +122,17 @@ async def log_change(db, book_doc, change_type, changes):
         f"[CHANGE] {change_type.upper()} for '{payload['book_name']}' "
         f"{payload['book_url']} -> {changes}"
     )
+
+
+async def fetch_changes_for_day(target_date: datetime):
+    """Fetch all change log entries for the given date (UTC) from MongoDB."""
+    start = datetime(target_date.year, target_date.month, target_date.day)
+    end = start + timedelta(days=1)
+
+    cursor = DB[CHANGELOG_COLLECTION].find({
+        "changed_at": {"$gte": start, "$lt": end}
+    })
+
+    results = await cursor.to_list(length=None)
+
+    return results

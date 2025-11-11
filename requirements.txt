@@ -3,3 +3,4 @@ beautifulsoup4
 pydantic
 motor
 apscheduler
+pandas

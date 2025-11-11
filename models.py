@@ -1,4 +1,3 @@
-# models.py
 from pydantic import BaseModel, HttpUrl, Field
 from typing import Optional
 from datetime import datetime

@@ -61,3 +61,30 @@ def build_changed_content(current_doc, existing_doc):
             changed_content[field] = {"old": old_val, "new": new_val}
 
     return changed_content
+
+
+def flatten_changes(records):
+    """
+    Generate a list of dictionaries, each representing a change.
+    """
+    flat_rows = []
+    for r in records:
+        base = {
+            "book_url": r.get("book_url"),
+            "book_name": r.get("book_name"),
+            "change_type": r.get("change_type"),
+            "changed_at": r.get("changed_at"),
+        }
+
+        changes = r.get("changes") or {}
+        if not changes: # New books
+            flat_rows.append({**base, "field": None, "old_value": None, "new_value": None})
+        else:
+            for field, vals in changes.items():
+                flat_rows.append({
+                    **base,
+                    "field": field,
+                    "old_value": vals.get("old"),
+                    "new_value": vals.get("new"),
+                })
+    return flat_rows
