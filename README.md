@@ -111,4 +111,53 @@ $ fastapi run api/api.py --reload
 2025-11-11 14:03:50,645 [INFO] book_scraper: Daily change report generated successfully.
 2025-11-11 14:03:50,645 [INFO] apscheduler.executors.default: Job "run_crawl (trigger: cron[hour='14', minute='3'], next run at: 2025-11-12 14:03:00 EAT)" executed successfully
 ```
-2. 
+2. MongoDB Sample Document Structures.
+- Books
+```
+[
+  {
+    "_id": {"$oid": "6912f24a4a95f9000b05c101"},
+    "availability": "In stock (22 available)",
+    "category": "Poetry",
+    "content_hash": "9a79f17bdd4ea7f34c5627590b58f9436088b5720eb2cfc65ce6e608eb1ea395",
+    "crawl_timestamp": "2025-11-11T08:22:34.745708",
+    "created_at": {"$date": "2025-11-11T08:22:34.754Z"},
+    "description": "It's hard to imagine a world without A Light in the Attic. This now-classic collection of poetry and drawings from Shel Silverstein celebrates its 20th anniversary with this special edition. Silverstein's humorous and creative verse can amuse the dowdiest of readers. Lemon-faced adults and fidgety kids sit still and read these rhythmic words and laugh and smile and love th It's hard to imagine a world without A Light in the Attic. This now-classic collection of poetry and drawings from Shel Silverstein celebrates its 20th anniversary with this special edition. Silverstein's humorous and creative verse can amuse the dowdiest of readers. Lemon-faced adults and fidgety kids sit still and read these rhythmic words and laugh and smile and love that Silverstein. Need proof of his genius? RockabyeRockabye baby, in the treetopDon't you know a treetopIs no safe place to rock?And who put you up there,And your cradle, too?Baby, I think someone down here'sGot it in for you. Shel, you never sounded so good. ...more",
+    "image_url": "https://books.toscrape.com/media/cache/fe/72/fe72f0532301ec28892ae79a629a293c.jpg",
+    "name": "A Light in the Attic",
+    "number_of_reviews": "0",
+    "price_excl_tax": "£51.77",
+    "price_incl_tax": "£51.77",
+    "rating": 3,
+    "raw_html": "\n\n<!DOCTYPE html>\n<!--[if lt IE 7]> ...",
+    "source_url": "https://books.toscrape.com//catalogue/a-light-in-the-attic_1000/index.html",
+    "status": "success",
+    "updated_at": {"$date": "2025-11-11T08:22:34.754Z"}
+  }
+]
+```
+
+- Crawler Progress. Supports Resuming.
+```
+[
+  {
+    "_id": "books_scraper",
+    "last_page": 1,
+    "updated_at": {"$date": "2025-11-11T11:03:50.612Z"}
+  }
+]
+```
+
+- Books Changelog.
+```
+[
+  {
+    "_id": {"$oid": "6912f24a4a95f9000b05c102"},
+    "book_name": "A Light in the Attic",
+    "book_url": "https://books.toscrape.com//catalogue/a-light-in-the-attic_1000/index.html",
+    "change_type": "new",
+    "changed_at": {"$date": "2025-11-11T08:22:34.791Z"},
+    "changes": "{}"
+  }
+]
+```
