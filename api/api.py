@@ -10,7 +10,7 @@ from db.db import DB, COLLECTION, CHANGELOG_COLLECTION
 from db.models import Book
 
 app = FastAPI(
-    title="Book Scraper API",
+    title="Book Crawler API",
     description="RESTful API over scraped books and change logs.",
     version="1.0.0",
 )

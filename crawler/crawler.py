@@ -106,7 +106,7 @@ async def generate_daily_report(format="csv"):
     df = pd.DataFrame(flat_records)
 
     # File name
-    filename = f"change_report_{date_str}.{format}"
+    filename = f"../reports/change_report_{date_str}.{format}"
 
     # Save report
     if format == "csv":

@@ -9,8 +9,6 @@ from utils import utils
 
 
 class TestBookCrawlerProject(unittest.IsolatedAsyncioTestCase):
-    """Comprehensive tests for the Book Crawler project."""
-
     def test_build_fingerprint_and_hash(self):
         doc = {
             "name": "Book",
