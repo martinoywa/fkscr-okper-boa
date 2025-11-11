@@ -1,17 +1,20 @@
 import argparse
 import asyncio
 import logging
+import os
 
 import aiohttp
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from dotenv import load_dotenv
 
-from crawler import crawl_page
+from crawler import crawl_page, generate_daily_report
 from db import DB, get_last_page
-from utils import generate_daily_report
 
-# Run every day at 11:40 server time
-CRAWL_HOUR = 12
-CRAWL_MINUTE = 5
+
+load_dotenv()
+
+SCHEDULER_CRAWL_HOUR = int(os.getenv("SCHEDULER_CRAWL_HOUR"))
+SCHEDULER_CRAWL_MINUTE = int(os.getenv("SCHEDULER_CRAWL_MINUTE"))
 
 
 logging.basicConfig(
@@ -47,7 +50,7 @@ def start_scheduler(generate_report, report_format):
     """
     scheduler = AsyncIOScheduler()
     scheduler.add_job(run_crawl, "cron",
-                      hour=CRAWL_HOUR, minute=CRAWL_MINUTE,
+                      hour=SCHEDULER_CRAWL_HOUR, minute=SCHEDULER_CRAWL_MINUTE,
                       args=[generate_report, report_format])
     scheduler.start()
 

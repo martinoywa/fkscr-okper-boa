@@ -1,12 +1,18 @@
+import json
+import os
 from datetime import datetime
 
 import requests
 from bs4 import BeautifulSoup
+from dotenv import load_dotenv
 
 from models import Book
 
-BASE_URL = "https://books.toscrape.com/"
-RATING_MAPPING = {"One": 1, "Two": 2, "Three": 3, "Four": 4, "Five": 5,}
+
+load_dotenv()
+
+RATING_MAPPING = json.loads(os.getenv("RATING_MAPPING"))
+
 
 def parse_book_html(html: str, url: str) -> Book:
     soup = BeautifulSoup(html, "html.parser")

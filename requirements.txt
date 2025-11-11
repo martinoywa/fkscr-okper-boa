@@ -4,3 +4,4 @@ pydantic
 motor
 apscheduler
 pandas
+python-dotenv

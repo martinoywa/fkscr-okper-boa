@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import os
 from datetime import datetime
 
 import pandas as pd
@@ -10,9 +11,13 @@ from db import save_book, save_progress, fetch_changes_for_day
 from get_book_metadata import parse_book_html
 from utils import flatten_changes
 
-# TODO use dotenv
-BASE_URL = "https://books.toscrape.com/"
-MAX_RETRIES = 3
+from dotenv import load_dotenv
+
+
+load_dotenv()
+
+BASE_URL = os.getenv("BASE_URL")
+MAX_RETRIES = int(os.getenv("MAX_RETRIES"))
 
 
 logging.basicConfig(
@@ -52,7 +57,6 @@ async def process_book(session, db, book_url):
         html = await fetch(session, book_url)
         book = parse_book_html(html, book_url)
         await save_book(db, book)
-        logging.info(f"Saved: {book.name}")
     except Exception as e:
         logging.error(f"Error processing {book_url}: {e}")
 

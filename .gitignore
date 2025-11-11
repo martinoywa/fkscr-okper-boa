@@ -1,2 +1,5 @@
 .idea/
 __pycache__/
+checklist.txt
+change_report_*
+crawler.log

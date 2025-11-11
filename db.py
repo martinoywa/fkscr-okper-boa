@@ -1,18 +1,22 @@
 import logging
+import os
 from datetime import datetime, timedelta
 
 import motor.motor_asyncio
+from dotenv import load_dotenv
 
 from models import Book
 from utils import compute_hash, build_changed_content
 
-# TODO use dotenv
-MONGO_URI = "mongodb://localhost:27017"
-COLLECTION = "books"
-DB_NAME = "bookstore"
-PROGRESS_COLLECTION = "crawler_progress"
-CRAWLER_NAME = "books_scraper"
-CHANGELOG_COLLECTION = "book_changelog"
+
+load_dotenv()
+
+MONGO_URI = os.getenv("MONGO_URI")
+DB_NAME = os.getenv("DB_NAME")
+COLLECTION = os.getenv("COLLECTION")
+PROGRESS_COLLECTION = os.getenv("PROGRESS_COLLECTION")
+CHANGELOG_COLLECTION = os.getenv("CHANGELOG_COLLECTION")
+CRAWLER_NAME = os.getenv("CRAWLER_NAME")
 
 
 CLIENT = motor.motor_asyncio.AsyncIOMotorClient(MONGO_URI)
@@ -54,7 +58,7 @@ async def save_book(db, book: Book):
         doc["updated_at"] = now
         await collection.insert_one(doc)
         await log_change(db, doc, "new", {})
-        logging.info(f"Inserted new book: {doc['name']}")
+        logging.info(f"Saved new book: {doc['name']}")
         return
 
     # Skip if nothing changed
