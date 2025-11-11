@@ -1,5 +1,4 @@
 import asyncio
-import logging
 import os
 from datetime import datetime
 
@@ -9,7 +8,7 @@ from bs4 import BeautifulSoup
 
 from db import save_book, save_progress, fetch_changes_for_day
 from get_book_metadata import parse_book_html
-from utils import flatten_changes
+from utils import flatten_changes, logger
 
 from dotenv import load_dotenv
 
@@ -20,16 +19,6 @@ BASE_URL = os.getenv("BASE_URL")
 MAX_RETRIES = int(os.getenv("MAX_RETRIES"))
 
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    handlers=[
-        logging.StreamHandler(),
-        logging.FileHandler("crawler.log", encoding="utf-8")
-    ]
-)
-
-
 async def fetch(session: ClientSession, url: str, retries=MAX_RETRIES) -> str:
     """Fetches a URL with retry logic."""
     for attempt in range(1, retries + 1):
@@ -38,7 +27,7 @@ async def fetch(session: ClientSession, url: str, retries=MAX_RETRIES) -> str:
                 response.raise_for_status()
                 return await response.text()
         except Exception as e:
-            logging.warning(f"Attempt {attempt} failed for {url}: {e}")
+            logger.warning(f"Attempt {attempt} failed for {url}: {e}")
             if attempt == retries:
                 raise
             await asyncio.sleep(2 * attempt)  # backoff
@@ -58,30 +47,30 @@ async def process_book(session, db, book_url):
         book = parse_book_html(html, book_url)
         await save_book(db, book)
     except Exception as e:
-        logging.error(f"Error processing {book_url}: {e}")
+        logger.error(f"Error processing {book_url}: {e}")
 
 
 async def crawl_page(session, db, page_number):
     """Crawl a single page of book listings."""
     url = BASE_URL+f"catalogue/page-{page_number}.html"
-    logging.info(f"Crawling {url}")
+    logger.info(f"Crawling {url}")
     try:
         page_html = await fetch(session, url)
     except Exception as e:
         # Detect "end of pagination"
         if "404" in str(e) or "Not Found" in str(e):
             await save_progress(db, 1)
-            logging.info(f"No next page found at {url}. Resetting progress to 1.")
+            logger.info(f"No next page found at {url}. Resetting progress to 1.")
             return False  # Stop crawling gracefully
 
-        logging.error(f"Failed to crawl {url}: {e}")
+        logger.error(f"Failed to crawl {url}: {e}")
         return False
 
     book_links = await get_book_links(session, page_html)
     if not book_links:
-        logging.info(f"No books found on {url}. Stopping pagination.")
+        logger.info(f"No books found on {url}. Stopping pagination.")
         return False
-    # logging.info(f"Found {len(book_links)}. "
+    # logger.info(f"Found {len(book_links)}. "
     #              f"First and last books: {book_links[0]} and {book_links[-1]}")
 
     tasks = []
@@ -91,7 +80,7 @@ async def crawl_page(session, db, page_number):
 
     # Save checkpoint after successfully completing this page
     await save_progress(db, page_number)
-    logging.info(f"Finished page {page_number}, checkpoint saved.")
+    logger.info(f"Finished page {page_number}, checkpoint saved.")
 
     return True
 
@@ -105,12 +94,12 @@ async def generate_daily_report(format="csv"):
     today = datetime.utcnow()
     date_str = today.strftime("%Y-%m-%d")
 
-    logging.info(f"Generating daily change report for {date_str}...")
+    logger.info(f"Generating daily change report for {date_str}...")
 
     # Fetch and flatten change records
     records = await fetch_changes_for_day(today)
     if not records:
-        logging.info(f"No changes found for {date_str}. Nothing to report.")
+        logger.info(f"No changes found for {date_str}. Nothing to report.")
         return
 
     flat_records = flatten_changes(records)
@@ -127,4 +116,4 @@ async def generate_daily_report(format="csv"):
     else:
         raise ValueError("Format must be 'csv' or 'json'")
 
-    logging.info(f"Change report saved to: {filename}")
+    logger.info(f"Change report saved to: {filename}")

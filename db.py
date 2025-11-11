@@ -1,4 +1,3 @@
-import logging
 import os
 from datetime import datetime, timedelta
 
@@ -6,8 +5,7 @@ import motor.motor_asyncio
 from dotenv import load_dotenv
 
 from models import Book
-from utils import compute_hash, build_changed_content
-
+from utils import compute_hash, build_changed_content, logger
 
 load_dotenv()
 
@@ -21,16 +19,6 @@ CRAWLER_NAME = os.getenv("CRAWLER_NAME")
 
 CLIENT = motor.motor_asyncio.AsyncIOMotorClient(MONGO_URI)
 DB = CLIENT[DB_NAME]
-
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    handlers=[
-        logging.StreamHandler(),
-        logging.FileHandler("crawler.log", encoding="utf-8")
-    ]
-)
 
 
 async def save_book(db, book: Book):
@@ -58,12 +46,12 @@ async def save_book(db, book: Book):
         doc["updated_at"] = now
         await collection.insert_one(doc)
         await log_change(db, doc, "new", {})
-        logging.info(f"Saved new book: {doc['name']}")
+        logger.info(f"Saved new book: {doc['name']}")
         return
 
     # Skip if nothing changed
     if existing.get("content_hash") == content_hash:
-        logging.debug(f"No changes for book: {doc['name']}")
+        logger.info(f"No changes for book: {doc['name']}")
         return
 
     # Detect and log changes otherwise.
@@ -76,16 +64,16 @@ async def save_book(db, book: Book):
         upsert=True,
     )
     await log_change(db, doc, "update", changed_content)
-    logging.info(f"Updated book: {doc['name']}")
+    logger.info(f"Updated book: {doc['name']}")
 
 
 async def get_last_page(db):
     """Read last crawled page number from MongoDB."""
     progress = await db[PROGRESS_COLLECTION].find_one({"_id": CRAWLER_NAME})
     if progress:
-        logging.info(f"Resuming from page {progress['last_page']}...")
+        logger.info(f"Resuming from page {progress['last_page']}...")
         return progress["last_page"]
-    logging.info("Starting fresh crawl from page 1...")
+    logger.info("Starting fresh crawl from page 1...")
     return 1
 
 
@@ -120,7 +108,7 @@ async def log_change(db, book_doc, change_type, changes):
     await db[CHANGELOG_COLLECTION].insert_one(payload)
 
     # Alerting line to the log.
-    logging.info(
+    logger.info(
         f"[CHANGE] {change_type.upper()} for '{payload['book_name']}' "
         f"{payload['book_url']} -> {changes}"
     )

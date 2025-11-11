@@ -1,17 +1,16 @@
 import hashlib
-import json
 import logging
-import os
-
 
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
     handlers=[
         logging.StreamHandler(),
-        logging.FileHandler("crawler.log", encoding="utf-8")
-    ]
+        logging.FileHandler("logs/crawler.log", encoding="utf-8"),
+    ],
 )
+
+logger = logging.getLogger("book_scraper")
 
 
 def build_fingerprint(doc):

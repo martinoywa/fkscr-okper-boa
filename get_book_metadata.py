@@ -2,12 +2,10 @@ import json
 import os
 from datetime import datetime
 
-import requests
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 
 from models import Book
-
 
 load_dotenv()
 

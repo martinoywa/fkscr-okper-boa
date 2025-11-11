@@ -1,6 +1,5 @@
 import argparse
 import asyncio
-import logging
 import os
 
 import aiohttp
@@ -9,7 +8,7 @@ from dotenv import load_dotenv
 
 from crawler import crawl_page, generate_daily_report
 from db import DB, get_last_page
-
+from utils import logger
 
 load_dotenv()
 
@@ -17,18 +16,8 @@ SCHEDULER_CRAWL_HOUR = int(os.getenv("SCHEDULER_CRAWL_HOUR"))
 SCHEDULER_CRAWL_MINUTE = int(os.getenv("SCHEDULER_CRAWL_MINUTE"))
 
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    handlers=[
-        logging.StreamHandler(),
-        logging.FileHandler("crawler.log", encoding="utf-8")
-    ]
-)
-
-
 async def run_crawl(generate_report, report_format):
-    logging.info("Starting scheduled crawl...")
+    logger.info("Starting scheduled crawl...")
     async with aiohttp.ClientSession() as session:
         page = await get_last_page(DB)
         while True:
@@ -36,11 +25,11 @@ async def run_crawl(generate_report, report_format):
             if not success:
                 break
             page += 1
-    logging.info("Scheduled crawl finished.")
+    logger.info("Scheduled crawl finished.")
 
     if generate_report:
         await generate_daily_report(report_format)
-        logging.info("Daily change report generated successfully.")
+        logger.info("Daily change report generated successfully.")
 
 
 def start_scheduler(generate_report, report_format):
@@ -54,11 +43,11 @@ def start_scheduler(generate_report, report_format):
                       args=[generate_report, report_format])
     scheduler.start()
 
-    logging.info("Scheduler started. Waiting for jobs...")
+    logger.info("Scheduler started. Waiting for jobs...")
     try:
         asyncio.get_event_loop().run_forever()
     except (KeyboardInterrupt, SystemExit):
-        logging.info("Scheduler stopped.")
+        logger.info("Scheduler stopped.")
 
 
 if __name__ == "__main__":
