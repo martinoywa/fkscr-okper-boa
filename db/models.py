@@ -1,4 +1,4 @@
-from pydantic import BaseModel, HttpUrl, Field
+from pydantic import BaseModel, HttpUrl, Field, ConfigDict
 from typing import Optional
 from datetime import datetime
 
@@ -21,5 +21,4 @@ class Book(BaseModel):
     status: str = "success" # TODO add different status types? The current system always guarantees success.
     content_hash: Optional[str] = None # Used for change detection.
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

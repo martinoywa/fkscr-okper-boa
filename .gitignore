@@ -5,4 +5,3 @@ change_report_*
 crawler.log
 .run/
 .DS_Store
-tests/
