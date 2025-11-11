@@ -16,8 +16,11 @@ class Book(BaseModel):
     number_of_reviews: str
     source_url: HttpUrl
     raw_html: Optional[str] = None
-    crawl_timestamp: datetime = Field(default_factory=datetime.utcnow)
-    status: str = "success"
+    crawl_timestamp: datetime = Field(default_factory=datetime.utcnow) # Shows crawl time
+    created_at: Optional[datetime] = None # Never changes
+    updated_at: Optional[datetime] = None
+    status: str = "success" # TODO add different status types? The current system always guarantees success.
+    content_hash: Optional[str] = None # Used for change detection.
 
     class Config:
         from_attributes = True

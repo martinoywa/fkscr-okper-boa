@@ -15,28 +15,16 @@ from get_book_metadata import parse_book_html
 # TODO use dotenv
 BASE_URL = "https://books.toscrape.com/"
 MAX_RETRIES = 3
-CHECKPOINT_FILE = "checkpoint.json"
 
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
-
-
-def load_checkpoint():
-    """Read last crawled page number from checkpoint.json"""
-    if os.path.exists(CHECKPOINT_FILE):
-        try:
-            with open(CHECKPOINT_FILE, "r") as f:
-                data = json.load(f)
-                return data.get("last_page", 1)
-        except Exception:
-            return 1
-    return 1
-
-
-def save_checkpoint(page_number):
-    """Save last successfully crawled page number."""
-    with open(CHECKPOINT_FILE, "w") as f:
-        json.dump({"last_page": page_number}, f)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler("crawler.log", encoding="utf-8")
+    ]
+)
 
 
 async def fetch(session: ClientSession, url: str, retries=MAX_RETRIES) -> str:
@@ -99,11 +87,6 @@ async def crawl_page(session, db, page_number):
 
     return True
 
-"""
-TODO: Check if a new book has been added.
-Use the book titles list fetched in DB against new fetch. i.e set difference.
-Then search by diff title and add new books to DB.
-"""
 
 async def main():
     async with aiohttp.ClientSession() as session:
