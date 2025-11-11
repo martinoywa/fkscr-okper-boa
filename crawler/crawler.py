@@ -6,9 +6,9 @@ import pandas as pd
 from aiohttp import ClientSession
 from bs4 import BeautifulSoup
 
-from db import save_book, save_progress, fetch_changes_for_day
-from get_book_metadata import parse_book_html
-from utils import flatten_changes, logger
+from db.db import save_book, save_progress, fetch_changes_for_day
+from crawler.get_book_metadata import parse_book_html
+from utils.utils import flatten_changes, logger
 
 from dotenv import load_dotenv
 

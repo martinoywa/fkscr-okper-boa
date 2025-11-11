@@ -6,9 +6,9 @@ import aiohttp
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from dotenv import load_dotenv
 
-from crawler import crawl_page, generate_daily_report
-from db import DB, get_last_page
-from utils import logger
+from crawler.crawler import crawl_page, generate_daily_report
+from db.db import DB, get_last_page
+from utils.utils import logger
 
 load_dotenv()
 

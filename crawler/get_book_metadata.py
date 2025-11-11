@@ -5,7 +5,7 @@ from datetime import datetime
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 
-from models import Book
+from db.models import Book
 
 load_dotenv()
 

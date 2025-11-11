@@ -4,8 +4,8 @@ from datetime import datetime, timedelta
 import motor.motor_asyncio
 from dotenv import load_dotenv
 
-from models import Book
-from utils import compute_hash, build_changed_content, logger
+from db.models import Book
+from utils.utils import compute_hash, build_changed_content, logger
 
 load_dotenv()
 
