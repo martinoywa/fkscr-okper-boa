@@ -1,9 +1,9 @@
 # Book Craweler and API
 ### Project Description
-1. A scalable and fault-tolerant web crawling.
+1. A scalable and fault-tolerant web crawler.
 2. Has change detection mechanism to maintain up-to-date records.
 3. RESTful API with authentication and filtering capabilities.
-4. Logging is eneabled across the system. Check `logs/crawler.log` once project is running.
+4. Logging eneabled across the system. Check `logs/crawler.log` once project is running.
 
 ### Directory Structure
 ```bash
